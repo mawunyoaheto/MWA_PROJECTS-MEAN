@@ -1,0 +1,24 @@
+Instructions
+Your Person Hobby Program is a program that demonstrates a hobby you have. Make sure your main hobby has no more than 3 attributes, 
+and it also has an array of sub-documents. Each sub-document also should not have more than 2 attributes. 
+(Example: Table Tennis main collection is teams a team has attributes (country, year, color) sub-document is player (name and age as attributes)).
+
+Rule: Soccer (football) is not accepted as a hobby (sorry, too many).
+
+During this weekend we create a headless CRUD application based on your PHP.
+
+The requirements are:
+
+1- A data-driven application.
+
+2- Your application has a document and an array of sub-documents (using one collection).
+
+3- Perform CRUD operations on the application's main documents (implement full update).
+
+4- Perform CRUD operations on the application's main sub-documents (implement full update).
+
+5- Make sure you use the proper URL paths and methods to perform CRUD operations as discussed in class.
+
+6- Your application must have API hardening.
+
+This application is due by Sunday night, Make sure you are awake with us on Monday.
