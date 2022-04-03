@@ -22,7 +22,7 @@ const getAll = (req, res) => {
     }
 
     if (response.status != 200) {
-        res.status(response.status).json(response.message);
+        res.status(response.status).json({status:"failed", msg:response.message});
     } else {
         MOVIES.findById(movieId).select("actors").exec((err, movie) => _findMovieByIdAndReturnResponse(err, movie, response, res));
     }
@@ -33,17 +33,17 @@ const getOne = (req, res) => {
     const { movieId, actorId, response } = _validateMovieIdAndActorIdFromReqAndReturnActorIdMovieIdAndResponse(req);
 
     if (response.status != 200 && response.status != 201) {
-        res.status(response.status).json(response.message);
+        res.status(response.status).json({status:"failed", msg:response.message});
     } else {
         MOVIES.findById(movieId).exec((err, movie) => {
             if (err) {
-                res.status(500).json(err);
+                res.status(500).json({status:"failed", msg:response.message});
             } else {
                 let actor = movie.actors.id(actorId);
                 if (actor) {
-                    res.status(200).json(actor);
+                    res.status(200).json({status:"success",data:actor});
                 } else {
-                    res.status(404).json("Actor with given id: " + actorId + " not found");
+                    res.status(404).json({status:"failed", msg:"Actor with given id: " + actorId + " not found"});
                 }
             }
 
@@ -72,7 +72,7 @@ const addOne = (req, res) => {
     }
 
     if (response.status != 201) {
-        res.status(response.status).json(response.message);
+        res.status(response.status).json({status:"failed", msg:response.message});
     } else {
 
         MOVIES.findById(movieId).select("actors").exec(function (err, movie) {
@@ -89,7 +89,7 @@ const addOne = (req, res) => {
             if (movie) {
                 _addActor(req, res, movie, response);
             } else {
-                res.status(response.status).json(response.message);
+                res.status(response.status).json({status:"failed", msg:response.message});
             }
         });
     }
@@ -102,7 +102,7 @@ const updateOne = (req, res) => {
     console.log(movieId, actorId, response);
 
     if (response.status != 200) {
-        res.status(response.status).json(response.message);
+        res.status(response.status).json({status:"failed", msg:response.message});
     } else {
         MOVIES.findById(movieId).exec((err, movie) => _updateActor(err, req, movie, res));
     }
@@ -112,7 +112,7 @@ const updateOne = (req, res) => {
 const deleteOne = (req, res) => {
     const { movieId, actorId, response } = _validateMovieIdAndActorIdFromReqAndReturnActorIdMovieIdAndResponse(req);
     if (response.status != 200) {
-        res.status(response.status).json(response.message);
+        res.status(response.status).json({status:"failed", msg:response.message});
     } else {
         MOVIES.findById(movieId).exec((err, movie) => _deleteActor(err, movie, req, res));
     }
@@ -189,10 +189,16 @@ const _addActor = (req, res, movie, response) => {
             // const response = { status: 200, message: [] };
             if (err) {
                 response.status = 500;
-                response.message = err;
+                response.message ={
+                    status:"failed",
+                    msg:err
+                } 
             } else {
                 response.status = 201;
-                response.message = movie.actors;
+                response.message ={
+                    status:"success",
+                    data:movie.actors
+                };
             }
             res.status(response.status).json(response.message);
         });
@@ -201,15 +207,15 @@ const _addActor = (req, res, movie, response) => {
 
 const _updateActor = (err, req, movie, res) => {
     if (err) {
-        res.status(500).json(err);
+        res.status(500).json({ status:"failed",error: err });
     } else {
         let actor = movie.actors.id(req.params.actorId);
         if (actor) {
             actor.name = req.body.name;
             actor.awards = req.body.awards;
             movie.save((err) => {
-                if (err) res.status(500).json(err);
-                res.status(201).json(movie);
+                if (err) res.status(500).json({ status:"failed",error: err });
+                res.status(201).json({status:"success",msg:"update successful"});
             });
         }
     }
@@ -217,17 +223,17 @@ const _updateActor = (err, req, movie, res) => {
 
 const _deleteActor = (err, movie, req, res) => {
     if (err) {
-        res.status(500).json(err);
+        res.status(500).json({ status:"failed",error: err });
     } else {
         let actor = movie.actors.id(req.parms.actorId);
         if (actor) {
             actor.remove();
             movie.save(function (err, resp) {
-                if (err) res.status(500).json(err);
-                else res.status(202).json(movie);
+                if (err) res.status(500).json({ status:"failed",error: err });
+                else res.status(201).json({status:"success",msg:"Actor deleted successfully"});
             });
         } else {
-            res.status(404).json("Actor with given id: " + actorId + "not found");
+            res.status(404).json({status:"failed",msg:"Actor with given id: " + actorId + "not found"});
         }
     }
 

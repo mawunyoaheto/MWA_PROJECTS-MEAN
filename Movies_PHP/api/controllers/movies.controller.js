@@ -34,7 +34,7 @@ const getAll = (req, res) => {
     }
 
     if (response.status != 200) {
-        res.status(response.status).json(response.message);
+        res.status(response.status).json({status:"failed",msg:response.message});
     } else {
         MOVIES.find().skip(offset).limit(count).exec((err, movies) => _getAllMoviesAndReturnResponse(err, movies, response, res));
 
@@ -67,7 +67,7 @@ const addOne = (req, res) => {
     }
 
     if (response.status != 201) {
-        res.status(response.status).json(response.message);
+        res.status(response.status).json({status:"failed",msg:response.message});
     } else {
         MOVIES.create(newMovie, (err, savedMovie) => _saveNewMovieAndSendResponse(err, savedMovie, response, res));
     }
@@ -78,7 +78,7 @@ const getOne = (req, res) => {
     const { movieId, response } = _validateMovieIdFromReqAndReturnMovieIdAndResponse(req);
 
     if (response.status != 200) {
-        res.status(response.status).json(response.message);
+        res.status(response.status).json({status:"failed",msg:response.message});
     } else {
         MOVIES.findById(movieId).exec((err, movie) => _findMovieByIdAndReturnResponse(err, movie, response, res));
     }
@@ -111,7 +111,7 @@ const updateOne = (req, res) => {
     }
 
     if (response.status != 201) {
-        res.status(response.status).json(response.message);
+        res.status(response.status).json({status:"failed",msg:response.message});
     } else {
         MOVIES.findByIdAndUpdate(movieId, updatedMovie, (err, newMovie) => _updateOne(err, newMovie, response, res));
     }
@@ -152,23 +152,27 @@ const _validateMovieIdFromReqAndReturnMovieIdAndResponse = (req) => {
 };
 
 const _getAllMoviesAndReturnResponse = (err, movies, response, res) => {
-    console.log("Found Movies", movies.length);
-    res.status(response.status).json(movies);
+    if (err) {
+        res.status(500).json({ status:"failed",error: err });
+    } else {
+        console.log("Found Movies", movies.length);
+        res.status(response.status).json({status:"success",data:movies});
+    }
 };
 
 const _findMovieByIdAndReturnResponse = (err, movie, response, res) => {
     if (err) {
-        res.status(500).json({ error: err });
+        res.status(500).json({ status:"failed",error: err });
     } else {
-        res.status(response.status).json(movie);
+        res.status(response.status).json({status:"success",data:movie});
     }
 };
 
 const _saveNewMovieAndSendResponse = (err, savedMovie, response, res) => {
     if (err) {
-        res.status(500).json({ error: err });
+        res.status(500).json({ status:"failed",error: err });
     } else {
-        res.status(response.status).json(savedMovie);
+        res.status(response.status).json({status:"success",msg:"Movie added sucessfully"});
     }
 
 };
@@ -176,9 +180,9 @@ const _saveNewMovieAndSendResponse = (err, savedMovie, response, res) => {
 const _deleteMovieByIdAndReturnResponse = (err, deletedMovie, response, res) => {
 
     if (err) {
-        res.status(500).json({ error: err });
+        res.status(500).json({ status:"failed",error: err });
     } else {
-        res.status(response.status).json(deletedMovie);
+        res.status(response.status).json({status:"success",msag:"Movie deleted successfully"});
     }
 };
 
@@ -187,7 +191,7 @@ const _updateOne = (err, updateMovie, response, res) => {
         console.log("Error updating movie");
         res.status(500).json(err);
     } else {
-        res.status(response.status).json(updateMovie);
+        res.status(response.status).json({status:"success",msg:"Movie updated sucessfully"});
     }
 };
 module.exports = {
