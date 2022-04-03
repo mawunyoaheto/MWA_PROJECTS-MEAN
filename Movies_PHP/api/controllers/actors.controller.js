@@ -104,21 +104,7 @@ const updateOne = (req, res) => {
     if (response.status != 200) {
         res.status(response.status).json(response.message);
     } else {
-        MOVIES.findById(movieId).exec((err, movie) => {
-            if (err) {
-                res.status(500).json(err);
-            } else {
-                let actor = movie.actors.id(actorId);
-                if (actor) {
-                    actor.name = req.body.name;
-                    actor.awards = req.body.awards;
-                    movie.save((err) => {
-                        if (err) res.status(500).json(err);
-                        res.status(201).json(movie);
-                    });
-                }
-            }
-        });
+        MOVIES.findById(movieId).exec((err, movie) => _updateActor(err, req, movie, res));
     }
 
 };
@@ -128,23 +114,7 @@ const deleteOne = (req, res) => {
     if (response.status != 200) {
         res.status(response.status).json(response.message);
     } else {
-        MOVIES.findById(movieId).exec((err, movie) => {
-            if (err) {
-                res.status(500).json(err);
-            } else {
-                let actor = movie.actors.id(actorId);
-                if (actor) {
-                    actor.remove();
-                    movie.save(function (err, resp) {
-                        if (err) res.status(500).json(err);
-                        else res.status(202).json(movie);
-                    });
-                } else {
-                    res.status(404).json("Actor with given id: " + actorId + "not found");
-                }
-            }
-
-        });
+        MOVIES.findById(movieId).exec((err, movie) => _deleteActor(err, movie, req, res));
     }
 };
 
@@ -227,6 +197,40 @@ const _addActor = (req, res, movie, response) => {
             res.status(response.status).json(response.message);
         });
     }
+};
+
+const _updateActor = (err, req, movie, res) => {
+    if (err) {
+        res.status(500).json(err);
+    } else {
+        let actor = movie.actors.id(req.params.actorId);
+        if (actor) {
+            actor.name = req.body.name;
+            actor.awards = req.body.awards;
+            movie.save((err) => {
+                if (err) res.status(500).json(err);
+                res.status(201).json(movie);
+            });
+        }
+    }
+};
+
+const _deleteActor = (err, movie, req, res) => {
+    if (err) {
+        res.status(500).json(err);
+    } else {
+        let actor = movie.actors.id(req.parms.actorId);
+        if (actor) {
+            actor.remove();
+            movie.save(function (err, resp) {
+                if (err) res.status(500).json(err);
+                else res.status(202).json(movie);
+            });
+        } else {
+            res.status(404).json("Actor with given id: " + actorId + "not found");
+        }
+    }
+
 };
 
 const _findMovieByIdAndReturnResponse = (err, movie, response, res) => {
